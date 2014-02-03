@@ -176,6 +176,7 @@ TESTS = \
 	mix_unittest \
 	rclient_unittest \
 	rstream_unittest \
+	shared_struct_size_unittest \
 	shm_unittest \
 	system_state_unittest \
 	util_unittest \
@@ -226,6 +227,22 @@ eq2_test_CPPFLAGS = $(COMMON_CPPFLAGS) -I$(top_srcdir)/src/dsp
 cmpraw_SOURCES = dsp/tests/cmpraw.c dsp/tests/raw.c
 cmpraw_LDADD = -lm
 cmpraw_CPPFLAGS = $(COMMON_CPPFLAGS) -I$(top_srcdir)/src/dsp
+
+# Shared structure compatibility between 32 and 64 bit:
+# run from shared_struct_size_unittest
+check_PROGRAMS += \
+	shared_struct_size_dump_32 \
+	shared_struct_size_dump_64
+
+shared_struct_size_dump_32_SOURCES = tests/shared_struct_size_dump.c
+shared_struct_size_dump_32_LDFLAGS = -lm
+shared_struct_size_dump_32_CFLAGS = -m32 \
+	-I$(top_srcdir)/src/common
+
+shared_struct_size_dump_64_SOURCES = tests/shared_struct_size_dump.c
+shared_struct_size_dump_64_LDADD = -lm
+shared_struct_size_dump_64_CFLAGS = $(COMMON_CFLAGS) \
+	-I$(top_srcdir)/src/common
 
 # unit tests
 alert_unittest_SOURCES = tests/alert_unittest.cc \
@@ -438,6 +455,11 @@ rstream_unittest_LDADD = -lasound -lgtest -lpthread
 shm_unittest_SOURCES = tests/shm_unittest.cc
 shm_unittest_CPPFLAGS = $(COMMON_CPPFLAGS) -I$(top_srcdir)/src/common
 shm_unittest_LDADD = -lgtest -lpthread
+
+shared_struct_size_unittest_SOURCES = tests/shared_struct_size_unittest.cc
+shared_struct_size_unittest_CPPFLAGS = $(COMMON_CPPFLAGS) \
+	 -I$(top_srcdir)/src/common
+shared_struct_size_unittest_LDADD = -lgtest -lpthread
 
 system_state_unittest_SOURCES = tests/system_state_unittest.cc \
 	server/cras_system_state.c
