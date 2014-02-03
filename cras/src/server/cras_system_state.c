@@ -159,16 +159,16 @@ void cras_system_state_deinit()
 	pthread_mutex_destroy(&state.update_lock);
 }
 
-void cras_system_set_volume(size_t volume)
+void cras_system_set_volume(uint32_t volume)
 {
 	if (volume > CRAS_MAX_SYSTEM_VOLUME)
-		syslog(LOG_DEBUG, "system volume set out of range %zu", volume);
+		syslog(LOG_DEBUG, "system volume set out of range %u", volume);
 
 	state.exp_state->volume = min(volume, CRAS_MAX_SYSTEM_VOLUME);
 	cras_alert_pending(state.volume_alert);
 }
 
-size_t cras_system_get_volume()
+uint32_t cras_system_get_volume()
 {
 	return state.exp_state->volume;
 }
@@ -183,14 +183,14 @@ int cras_system_remove_volume_changed_cb(cras_alert_cb cb, void *arg)
 	return cras_alert_rm_callback(state.volume_alert, cb, arg);
 }
 
-void cras_system_set_capture_gain(long gain)
+void cras_system_set_capture_gain(int32_t gain)
 {
 	state.exp_state->capture_gain =
 		max(gain, state.exp_state->min_capture_gain);
 	cras_alert_pending(state.capture_gain_alert);
 }
 
-long cras_system_get_capture_gain()
+int32_t cras_system_get_capture_gain()
 {
 	return state.exp_state->capture_gain;
 }
@@ -295,19 +295,19 @@ int cras_system_remove_capture_mute_changed_cb(cras_alert_cb cb, void *arg)
 	return cras_alert_rm_callback(state.capture_mute_alert, cb, arg);
 }
 
-void cras_system_set_volume_limits(long min, long max)
+void cras_system_set_volume_limits(int32_t min, int32_t max)
 {
 	state.exp_state->min_volume_dBFS = min;
 	state.exp_state->max_volume_dBFS = max;
 	cras_alert_pending(state.volume_limits_alert);
 }
 
-long cras_system_get_min_volume()
+int32_t cras_system_get_min_volume()
 {
 	return state.exp_state->min_volume_dBFS;
 }
 
-long cras_system_get_max_volume()
+int32_t cras_system_get_max_volume()
 {
 	return state.exp_state->max_volume_dBFS;
 }
@@ -322,19 +322,19 @@ int cras_system_remove_volume_limits_changed_cb(cras_alert_cb cb, void *arg)
 	return cras_alert_rm_callback(state.volume_limits_alert, cb, arg);
 }
 
-void cras_system_set_capture_gain_limits(long min, long max)
+void cras_system_set_capture_gain_limits(int32_t min, int32_t max)
 {
 	state.exp_state->min_capture_gain = max(min, DEFAULT_MIN_CAPTURE_GAIN);
 	state.exp_state->max_capture_gain = max;
 	cras_alert_pending(state.volume_limits_alert);
 }
 
-long cras_system_get_min_capture_gain()
+int32_t cras_system_get_min_capture_gain()
 {
 	return state.exp_state->min_capture_gain;
 }
 
-long cras_system_get_max_capture_gain()
+int32_t cras_system_get_max_capture_gain()
 {
 	return state.exp_state->max_capture_gain;
 }
@@ -448,7 +448,7 @@ void cras_system_state_stream_removed()
 
 	/* Set the last active time when removing the final stream. */
 	if (s->num_active_streams == 1)
-		clock_gettime(CLOCK_MONOTONIC, &s->last_active_stream_time);
+		cras_clock_gettime(CLOCK_MONOTONIC, &s->last_active_stream_time);
 	s->num_active_streams--;
 
 	cras_system_state_update_complete();
@@ -470,7 +470,7 @@ int cras_system_remove_active_streams_changed_cb(cras_alert_cb cb, void *arg)
 	return cras_alert_rm_callback(state.active_streams_alert, cb, arg);
 }
 
-void cras_system_state_get_last_stream_active_time(struct timespec *ts)
+void cras_system_state_get_last_stream_active_time(struct cras_timespec *ts)
 {
 	*ts = state.exp_state->last_active_stream_time;
 }

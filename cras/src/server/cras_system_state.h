@@ -33,9 +33,9 @@ void cras_system_state_init();
 void cras_system_state_deinit();
 
 /* Sets the system volume.  Will be applied by the active device. */
-void cras_system_set_volume(size_t volume);
+void cras_system_set_volume(uint32_t volume);
 /* Gets the current system volume. */
-size_t cras_system_get_volume();
+uint32_t cras_system_get_volume();
 
 /* Adds a callback to call when the volume changes.
  * Args:
@@ -53,9 +53,9 @@ int cras_system_register_volume_changed_cb(cras_alert_cb cb, void *arg);
 int cras_system_remove_volume_changed_cb(cras_alert_cb cb, void *arg);
 
 /* Sets the system capture volume.  Will be applied by the active device. */
-void cras_system_set_capture_gain(long gain);
+void cras_system_set_capture_gain(int32_t gain);
 /* Gets the current system capture volume. */
-long cras_system_get_capture_gain();
+int32_t cras_system_get_capture_gain();
 
 /* Adds a callback to call when the capture volume changes.
  * Args:
@@ -134,11 +134,11 @@ int cras_system_remove_capture_mute_changed_cb(cras_alert_cb cb, void *arg);
  *     min - dB value when volume = 1 (0 mutes).
  *     max - dB value when volume = CRAS_MAX_SYSTEM_VOLUME
  */
-void cras_system_set_volume_limits(long min, long max);
+void cras_system_set_volume_limits(int32_t min, int32_t max);
 /* Returns the dB value when volume = 1, in dB * 100. */
-long cras_system_get_min_volume();
+int32_t cras_system_get_min_volume();
 /* Returns the dB value when volume = CRAS_MAX_SYSTEM_VOLUME, in dB * 100. */
-long cras_system_get_max_volume();
+int32_t cras_system_get_max_volume();
 
 /* Adds a callback to call when the volume limits change.
  * Args:
@@ -163,11 +163,11 @@ int cras_system_remove_volume_limits_changed_cb(cras_alert_cb cb, void *arg);
  *     min - minimum allowed capture gain.
  *     max - maximum allowed capture gaax.
  */
-void cras_system_set_capture_gain_limits(long min, long max);
+void cras_system_set_capture_gain_limits(int32_t min, int32_t max);
 /* Returns the max value allowed for capture gain in dB * 100. */
-long cras_system_get_min_capture_gain();
+int32_t cras_system_get_min_capture_gain();
 /* Returns the min value allowed for capture gain in dB * 100. */
-long cras_system_get_max_capture_gain();
+int32_t cras_system_get_max_capture_gain();
 
 /* Adds a card at the given index to the system.  When a new card is found
  * (through a udev event notification) this will add the card to the system,
@@ -271,7 +271,7 @@ int cras_system_remove_active_streams_changed_cb(cras_alert_cb cb, void *arg);
 /* Fills ts with the time the last stream was removed from the system, the time
  * the stream count went to zero.
  */
-void cras_system_state_get_last_stream_active_time(struct timespec *ts);
+void cras_system_state_get_last_stream_active_time(struct cras_timespec *ts);
 
 /* Returns output devices information.
  * Args:

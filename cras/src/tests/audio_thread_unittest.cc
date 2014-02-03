@@ -32,8 +32,8 @@ static struct timeval select_timeval;
 static int select_max_fd;
 static fd_set select_in_fds;
 static fd_set select_out_fds;
-static size_t *select_write_ptr;
-static size_t select_write_value;
+static uint32_t *select_write_ptr;
+static uint32_t select_write_value;
 static unsigned int cras_iodev_config_params_for_streams_called;
 static unsigned int cras_iodev_config_params_for_streams_buffer_size;
 static unsigned int cras_iodev_config_params_for_streams_threshold;
@@ -1490,13 +1490,13 @@ void cras_iodev_fill_time_from_frames(size_t frames,
 
 void cras_iodev_set_playback_timestamp(size_t frame_rate,
                                        size_t frames,
-                                       struct timespec *ts) {
+                                       struct cras_timespec *ts) {
   cras_iodev_set_playback_timestamp_called++;
 }
 
 void cras_iodev_set_capture_timestamp(size_t frame_rate,
                                       size_t frames,
-                                      struct timespec *ts) {
+                                      struct cras_timespec *ts) {
 }
 
 void cras_iodev_config_params(struct cras_iodev *iodev,
@@ -1518,13 +1518,13 @@ int cras_iodev_set_format(struct cras_iodev *iodev,
 size_t cras_mix_add_stream(struct cras_audio_shm *shm,
                            size_t num_channels,
                            uint8_t *dst,
-                           size_t *count,
-                           size_t *index) {
+                           uint32_t *count,
+                           uint32_t *index) {
   int16_t *src;
   int16_t *target = (int16_t *)dst;
-  size_t fr_written, fr_in_buf;
-  size_t num_samples;
-  size_t frames = 0;
+  uint32_t fr_written, fr_in_buf;
+  uint32_t num_samples;
+  uint32_t frames = 0;
 
   if (cras_mix_add_stream_dont_fill_next) {
     cras_mix_add_stream_dont_fill_next = 0;
@@ -1585,7 +1585,8 @@ int cras_rstream_get_audio_request_reply(const struct cras_rstream *stream) {
   return 0;
 }
 
-int cras_rstream_audio_ready(const struct cras_rstream *stream, size_t count) {
+int cras_rstream_audio_ready(const struct cras_rstream *stream,
+                             uint32_t count) {
   cras_rstream_audio_ready_called++;
   cras_rstream_audio_ready_count = count;
   return 0;

@@ -986,13 +986,13 @@ const char *cras_alsa_mixer_get_output_name(
 }
 
 //  From system_state.
-size_t cras_system_get_volume()
+uint32_t cras_system_get_volume()
 {
   sys_get_volume_called++;
   return sys_get_volume_return_value;
 }
 
-long cras_system_get_capture_gain()
+int32_t cras_system_get_capture_gain()
 {
   sys_get_capture_gain_called++;
   return sys_get_capture_gain_return_value;
@@ -1010,12 +1010,12 @@ int cras_system_get_capture_mute()
   return sys_get_capture_mute_return_value;
 }
 
-void cras_system_set_volume_limits(long min, long max)
+void cras_system_set_volume_limits(int32_t min, int32_t max)
 {
   sys_set_volume_limits_called++;
 }
 
-void cras_system_set_capture_gain_limits(long min, long max)
+void cras_system_set_capture_gain_limits(int32_t min, int32_t max)
 {
   sys_set_capture_gain_limits_called++;
 }
