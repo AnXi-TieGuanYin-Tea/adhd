@@ -176,6 +176,7 @@ TESTS = \
 	mix_unittest \
 	rclient_unittest \
 	rstream_unittest \
+	shared_struct_size_unittest \
 	shm_unittest \
 	system_state_unittest \
 	util_unittest \
@@ -438,6 +439,11 @@ rstream_unittest_LDADD = -lasound -lgtest -lpthread
 shm_unittest_SOURCES = tests/shm_unittest.cc
 shm_unittest_CPPFLAGS = $(COMMON_CPPFLAGS) -I$(top_srcdir)/src/common
 shm_unittest_LDADD = -lgtest -lpthread
+
+shared_struct_size_unittest_SOURCES = tests/shared_struct_size_unittest.cc
+shared_struct_size_unittest_CPPFLAGS = $(COMMON_CPPFLAGS) \
+	 -I$(top_srcdir)/src/common
+shared_struct_size_unittest_LDADD = -lgtest -lpthread
 
 system_state_unittest_SOURCES = tests/system_state_unittest.cc \
 	server/cras_system_state.c
