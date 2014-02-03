@@ -6,6 +6,7 @@
 #ifndef CRAS_AUDIO_FORMAT_H_
 #define CRAS_AUDIO_FORMAT_H_
 
+#include <stdint.h>
 #include <alsa/asoundlib.h>
 
 /* Identifiers for each channel in audio stream. */
@@ -31,12 +32,12 @@ enum CRAS_CHANNEL {
 };
 
 /* Audio format. */
-struct cras_audio_format {
+struct __attribute__ ((__packed__)) cras_audio_format {
 	snd_pcm_format_t format;
-	size_t frame_rate; /* Hz */
+	uint32_t frame_rate; /* Hz */
 
 	// TODO(hychao): use channel_layout to replace num_channels
-	size_t num_channels;
+	uint32_t num_channels;
 
 	/* Channel layout whose value represents the index of each
 	 * CRAS_CHANNEL in the layout. Value -1 means the channel is
@@ -49,16 +50,17 @@ struct cras_audio_format {
 /* Returns the number of bytes per sample.
  * This is bits per smaple / 8 * num_channels.
  */
-static inline size_t cras_get_format_bytes(const struct cras_audio_format *fmt)
+static inline uint32_t cras_get_format_bytes(
+					const struct cras_audio_format *fmt)
 {
 	const int bytes = snd_pcm_format_physical_width(fmt->format) / 8;
-	return (size_t)bytes * fmt->num_channels;
+	return (uint32_t)bytes * fmt->num_channels;
 }
 
 /* Create an audio format structure. */
 struct cras_audio_format *cras_audio_format_create(snd_pcm_format_t format,
-						   size_t frame_rate,
-						   size_t num_channels);
+						   uint32_t frame_rate,
+						   uint32_t num_channels);
 
 /* Destroy an audio format struct created with cras_audio_format_crate. */
 void cras_audio_format_destroy(struct cras_audio_format *fmt);
@@ -72,10 +74,10 @@ int cras_audio_format_set_channel_layout(struct cras_audio_format *format,
 					 int8_t layout[CRAS_CH_MAX]);
 
 /* Allocates an empty channel conversion matrix of given size. */
-float** cras_channel_conv_matrix_alloc(size_t in_ch, size_t out_ch);
+float** cras_channel_conv_matrix_alloc(uint32_t in_ch, uint32_t out_ch);
 
 /* Destroys the channel conversion matrix. */
-void cras_channel_conv_matrix_destroy(float **mtx, size_t out_ch);
+void cras_channel_conv_matrix_destroy(float **mtx, uint32_t out_ch);
 
 /* Creates channel conversion matrix for given input and output format.
  * Returns NULL if the conversion is not supported between the channel

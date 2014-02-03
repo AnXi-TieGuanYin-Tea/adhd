@@ -424,7 +424,7 @@ struct cras_fmt_conv *cras_fmt_conv_create(const struct cras_audio_format *in,
 	/* Set up channel number conversion. */
 	if (in->num_channels != out->num_channels) {
 		conv->num_converters++;
-		syslog(LOG_DEBUG, "Convert from %zu to %zu channels.",
+		syslog(LOG_DEBUG, "Convert from %u to %u channels.",
 		       in->num_channels, out->num_channels);
 
 		/* Populate the conversion matrix base on in/out channel count
@@ -465,7 +465,7 @@ struct cras_fmt_conv *cras_fmt_conv_create(const struct cras_audio_format *in,
 			}
 		} else {
 			syslog(LOG_WARNING,
-			       "Invalid channel conversion %zu to %zu",
+			       "Invalid channel conversion %u to %u",
 			       in->num_channels, out->num_channels);
 			cras_fmt_conv_destroy(conv);
 			return NULL;
@@ -484,7 +484,7 @@ struct cras_fmt_conv *cras_fmt_conv_create(const struct cras_audio_format *in,
 	/* Set up sample rate conversion. */
 	if (in->frame_rate != out->frame_rate) {
 		conv->num_converters++;
-		syslog(LOG_DEBUG, "Convert from %zu to %zu Hz.",
+		syslog(LOG_DEBUG, "Convert from %u to %u Hz.",
 		       in->frame_rate, out->frame_rate);
 		conv->speex_state = speex_resampler_init(out->num_channels,
 							 in->frame_rate,
@@ -492,7 +492,7 @@ struct cras_fmt_conv *cras_fmt_conv_create(const struct cras_audio_format *in,
 							 SPEEX_QUALITY_LEVEL,
 							 &rc);
 		if (conv->speex_state == NULL) {
-			syslog(LOG_ERR, "Fail to create speex:%zu %zu %zu %d",
+			syslog(LOG_ERR, "Fail to create speex:%u %u %u %d",
 			       out->num_channels,
 			       in->frame_rate,
 			       out->frame_rate,

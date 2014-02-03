@@ -838,7 +838,7 @@ int cras_ionode_better(struct cras_ionode *a, struct cras_ionode *b)
   return 0;
 }
 
-size_t cras_system_get_volume() {
+uint32_t cras_system_get_volume() {
   return cras_system_get_volume_return;
 }
 

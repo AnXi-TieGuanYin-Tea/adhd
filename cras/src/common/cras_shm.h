@@ -20,9 +20,9 @@
  *  used_size - The size in bytes of the sample area being actively used.
  *  frame_bytes - The size of each frame in bytes.
  */
-struct cras_audio_shm_config {
-	unsigned int used_size;
-	unsigned int frame_bytes;
+struct __attribute__ ((__packed__)) cras_audio_shm_config {
+	uint32_t used_size;
+	uint32_t frame_bytes;
 };
 
 /* Structure that is shared as shm between client and server.
@@ -47,19 +47,19 @@ struct cras_audio_shm_config {
  *  samples - Audio data - a double buffered area that is used to exchange
  *    audio samples.
  */
-struct cras_audio_shm_area {
+struct __attribute__ ((__packed__)) cras_audio_shm_area {
 	struct cras_audio_shm_config config;
-	size_t read_buf_idx; /* use buffer A or B */
-	size_t write_buf_idx;
-	size_t read_offset[CRAS_NUM_SHM_BUFFERS];
-	size_t write_offset[CRAS_NUM_SHM_BUFFERS];
-	int write_in_progress[CRAS_NUM_SHM_BUFFERS];
+	uint32_t read_buf_idx; /* use buffer A or B */
+	uint32_t write_buf_idx;
+	uint32_t read_offset[CRAS_NUM_SHM_BUFFERS];
+	uint32_t write_offset[CRAS_NUM_SHM_BUFFERS];
+	int32_t write_in_progress[CRAS_NUM_SHM_BUFFERS];
 	float volume_scaler;
-	size_t mute;
-	size_t callback_pending;
-	size_t num_overruns;
-	size_t num_cb_timeouts;
-	struct timespec ts;
+	int32_t mute;
+	int32_t callback_pending;
+	uint32_t num_overruns;
+	uint32_t num_cb_timeouts;
+	struct cras_timespec ts;
 	uint8_t samples[];
 };
 
@@ -75,7 +75,7 @@ struct cras_audio_shm {
 
 /* Get a pointer to the buffer at idx. */
 static inline uint8_t *cras_shm_buff_for_idx(struct cras_audio_shm *shm,
-					     size_t idx)
+					     uint32_t idx)
 {
 	assert_on_compile_is_power_of_2(CRAS_NUM_SHM_BUFFERS);
 	idx = idx & CRAS_SHM_BUFFERS_MASK;
@@ -83,8 +83,8 @@ static inline uint8_t *cras_shm_buff_for_idx(struct cras_audio_shm *shm,
 }
 
 /* Limit a read offset to within the buffer size. */
-static inline unsigned cras_shm_check_read_offset(struct cras_audio_shm *shm,
-						  unsigned offset)
+static inline uint32_t cras_shm_check_read_offset(struct cras_audio_shm *shm,
+						  uint32_t offset)
 {
 	/* The offset is allowed to be the total size, indicating that the
 	 * buffer is full. If read pointer is invalid assume it is at the
@@ -95,8 +95,8 @@ static inline unsigned cras_shm_check_read_offset(struct cras_audio_shm *shm,
 }
 
 /* Limit a write offset to within the buffer size. */
-static inline unsigned cras_shm_check_write_offset(struct cras_audio_shm *shm,
-						   unsigned offset)
+static inline uint32_t cras_shm_check_write_offset(struct cras_audio_shm *shm,
+						   uint32_t offset)
 {
 	/* The offset is allowed to be the total size, indicating that the
 	 * buffer is full. If write pointer is invalid assume it is at the
@@ -109,7 +109,7 @@ static inline unsigned cras_shm_check_write_offset(struct cras_audio_shm *shm,
 /* Get a pointer to the current read buffer */
 static inline uint8_t *cras_shm_get_curr_read_buffer(struct cras_audio_shm *shm)
 {
-	unsigned i = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t i = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
 
 	return cras_shm_buff_for_idx(shm, i) +
 		cras_shm_check_read_offset(shm, shm->area->read_offset[i]);
@@ -119,7 +119,7 @@ static inline uint8_t *cras_shm_get_curr_read_buffer(struct cras_audio_shm *shm)
 static inline
 uint8_t *cras_shm_get_write_buffer_base(struct cras_audio_shm *shm)
 {
-	unsigned i = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t i = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
 
 	return cras_shm_buff_for_idx(shm, i);
 }
@@ -127,12 +127,12 @@ uint8_t *cras_shm_get_write_buffer_base(struct cras_audio_shm *shm)
 /* Get a pointer to the next buffer to write */
 static inline
 uint8_t *cras_shm_get_writeable_frames(struct cras_audio_shm *shm,
-				       unsigned limit_frames,
-				       unsigned *frames)
+				       uint32_t limit_frames,
+				       uint32_t *frames)
 {
-	unsigned i = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
-	unsigned write_offset;
-	const unsigned frame_bytes = shm->config.frame_bytes;
+	uint32_t i = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t write_offset;
+	const uint32_t frame_bytes = shm->config.frame_bytes;
 
 	write_offset = cras_shm_check_write_offset(shm,
 						   shm->area->write_offset[i]);
@@ -147,11 +147,11 @@ uint8_t *cras_shm_get_writeable_frames(struct cras_audio_shm *shm,
  * copied from the returned buffer.
  */
 static inline int16_t *cras_shm_get_readable_frames(struct cras_audio_shm *shm,
-						    size_t offset,
-						    size_t *frames)
+						    uint32_t offset,
+						    uint32_t *frames)
 {
-	unsigned buf_idx = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
-	unsigned read_offset, write_offset, final_offset;
+	uint32_t buf_idx = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t read_offset, write_offset, final_offset;
 
 	assert(frames != NULL);
 
@@ -179,14 +179,14 @@ static inline int16_t *cras_shm_get_readable_frames(struct cras_audio_shm *shm,
 }
 
 /* How many bytes are queued? */
-static inline size_t cras_shm_get_bytes_queued(struct cras_audio_shm *shm)
+static inline uint32_t cras_shm_get_bytes_queued(struct cras_audio_shm *shm)
 {
-	size_t total, i;
-	const unsigned used_size = shm->config.used_size;
+	uint32_t total, i;
+	const uint32_t used_size = shm->config.used_size;
 
 	total = 0;
 	for (i = 0; i < CRAS_NUM_SHM_BUFFERS; i++) {
-		unsigned read_offset, write_offset;
+		uint32_t read_offset, write_offset;
 
 		read_offset = min(shm->area->read_offset[i], used_size);
 		write_offset = min(shm->area->write_offset[i], used_size);
@@ -200,7 +200,7 @@ static inline size_t cras_shm_get_bytes_queued(struct cras_audio_shm *shm)
 /* How many frames are queued? */
 static inline int cras_shm_get_frames(struct cras_audio_shm *shm)
 {
-	size_t bytes;
+	uint32_t bytes;
 
 	bytes = cras_shm_get_bytes_queued(shm);
 	if (bytes % shm->config.frame_bytes != 0)
@@ -210,11 +210,11 @@ static inline int cras_shm_get_frames(struct cras_audio_shm *shm)
 
 /* How many frames in the current buffer? */
 static inline
-size_t cras_shm_get_frames_in_curr_buffer(struct cras_audio_shm *shm)
+uint32_t cras_shm_get_frames_in_curr_buffer(struct cras_audio_shm *shm)
 {
-	size_t buf_idx = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
-	unsigned read_offset, write_offset;
-	const unsigned used_size = shm->config.used_size;
+	uint32_t buf_idx = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t read_offset, write_offset;
+	const uint32_t used_size = shm->config.used_size;
 
 	read_offset = min(shm->area->read_offset[buf_idx], used_size);
 	write_offset = min(shm->area->write_offset[buf_idx], used_size);
@@ -228,13 +228,13 @@ size_t cras_shm_get_frames_in_curr_buffer(struct cras_audio_shm *shm)
 /* Return 1 if there is an empty buffer in the list. */
 static inline int cras_shm_is_buffer_available(struct cras_audio_shm *shm)
 {
-	size_t buf_idx = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t buf_idx = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
 
 	return (shm->area->write_offset[buf_idx] == 0);
 }
 
 /* How many are available to be written? */
-static inline size_t cras_shm_get_num_writeable(struct cras_audio_shm *shm)
+static inline uint32_t cras_shm_get_num_writeable(struct cras_audio_shm *shm)
 {
 	/* Not allowed to write to a buffer twice. */
 	if (!cras_shm_is_buffer_available(shm))
@@ -246,8 +246,8 @@ static inline size_t cras_shm_get_num_writeable(struct cras_audio_shm *shm)
 /* Flags an overrun if writing would cause one. */
 static inline void cras_shm_check_write_overrun(struct cras_audio_shm *shm)
 {
-	size_t write_buf_idx = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
-	size_t read_buf_idx = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t write_buf_idx = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t read_buf_idx = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
 
 	if (!shm->area->write_in_progress[write_buf_idx]) {
 		if (write_buf_idx != read_buf_idx)
@@ -260,18 +260,18 @@ static inline void cras_shm_check_write_overrun(struct cras_audio_shm *shm)
 
 /* Increment the write pointer for the current buffer. */
 static inline
-void cras_shm_buffer_written(struct cras_audio_shm *shm, size_t frames)
+void cras_shm_buffer_written(struct cras_audio_shm *shm, uint32_t frames)
 {
-	size_t buf_idx = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t buf_idx = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
 
 	shm->area->write_offset[buf_idx] += frames * shm->config.frame_bytes;
 	shm->area->read_offset[buf_idx] = 0;
 }
 
 /* Returns the number of frames that have been written to the current buffer. */
-static inline unsigned int cras_shm_frames_written(struct cras_audio_shm *shm)
+static inline uint32_t cras_shm_frames_written(struct cras_audio_shm *shm)
 {
-	size_t buf_idx = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t buf_idx = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
 
 	return shm->area->write_offset[buf_idx] / shm->config.frame_bytes;
 }
@@ -279,7 +279,7 @@ static inline unsigned int cras_shm_frames_written(struct cras_audio_shm *shm)
 /* Signals the writing to this buffer is complete and moves to the next one. */
 static inline void cras_shm_buffer_write_complete(struct cras_audio_shm *shm)
 {
-	size_t buf_idx = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t buf_idx = shm->area->write_buf_idx & CRAS_SHM_BUFFERS_MASK;
 
 	shm->area->write_in_progress[buf_idx] = 0;
 
@@ -291,10 +291,10 @@ static inline void cras_shm_buffer_write_complete(struct cras_audio_shm *shm)
 /* Increment the read pointer.  If it goes past the write pointer for this
  * buffer, move to the next buffer. */
 static inline
-void cras_shm_buffer_read(struct cras_audio_shm *shm, size_t frames)
+void cras_shm_buffer_read(struct cras_audio_shm *shm, uint32_t frames)
 {
-	size_t buf_idx = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
-	size_t remainder;
+	uint32_t buf_idx = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t remainder;
 	struct cras_audio_shm_area *area = shm->area;
 	struct cras_audio_shm_config *config = &shm->config;
 
@@ -323,9 +323,9 @@ void cras_shm_buffer_read(struct cras_audio_shm *shm, size_t frames)
 /* Read from the current buffer. This is similar to cras_shm_buffer_read(), but
  * it doesn't check for the case we may read from two buffers. */
 static inline
-void cras_shm_buffer_read_current(struct cras_audio_shm *shm, size_t frames)
+void cras_shm_buffer_read_current(struct cras_audio_shm *shm, uint32_t frames)
 {
-	size_t buf_idx = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
+	uint32_t buf_idx = shm->area->read_buf_idx & CRAS_SHM_BUFFERS_MASK;
 	struct cras_audio_shm_area *area = shm->area;
 	struct cras_audio_shm_config *config = &shm->config;
 
@@ -354,20 +354,20 @@ static inline float cras_shm_get_volume_scaler(struct cras_audio_shm *shm)
 }
 
 /* Indicates that the stream should be muted/unmuted */
-static inline void cras_shm_set_mute(struct cras_audio_shm *shm, size_t mute)
+static inline void cras_shm_set_mute(struct cras_audio_shm *shm, int32_t mute)
 {
 	shm->area->mute = !!mute;
 }
 
 /* Returns the mute state of the stream.  0 if not muted, non-zero if muted. */
-static inline size_t cras_shm_get_mute(struct cras_audio_shm *shm)
+static inline int32_t cras_shm_get_mute(struct cras_audio_shm *shm)
 {
 	return shm->area->mute;
 }
 
 /* Sets the size of a frame in bytes. */
 static inline void cras_shm_set_frame_bytes(struct cras_audio_shm *shm,
-					    unsigned frame_bytes)
+					    uint32_t frame_bytes)
 {
 	shm->config.frame_bytes = frame_bytes;
 	if (shm->area)
@@ -375,7 +375,7 @@ static inline void cras_shm_set_frame_bytes(struct cras_audio_shm *shm,
 }
 
 /* Returns the size of a frame in bytes. */
-static inline unsigned cras_shm_frame_bytes(const struct cras_audio_shm *shm)
+static inline uint32_t cras_shm_frame_bytes(const struct cras_audio_shm *shm)
 {
 	return shm->config.frame_bytes;
 }
@@ -397,7 +397,7 @@ static inline int cras_shm_callback_pending(const struct cras_audio_shm *shm)
  * that is exchanged each time a buffer is passed from client to server.
  */
 static inline
-void cras_shm_set_used_size(struct cras_audio_shm *shm, unsigned used_size)
+void cras_shm_set_used_size(struct cras_audio_shm *shm, uint32_t used_size)
 {
 	shm->config.used_size = used_size;
 	if (shm->area)
@@ -405,19 +405,19 @@ void cras_shm_set_used_size(struct cras_audio_shm *shm, unsigned used_size)
 }
 
 /* Returns the used size of the shm region in bytes. */
-static inline unsigned cras_shm_used_size(const struct cras_audio_shm *shm)
+static inline uint32_t cras_shm_used_size(const struct cras_audio_shm *shm)
 {
 	return shm->config.used_size;
 }
 
 /* Returns the used size of the shm region in frames. */
-static inline unsigned cras_shm_used_frames(const struct cras_audio_shm *shm)
+static inline uint32_t cras_shm_used_frames(const struct cras_audio_shm *shm)
 {
 	return shm->config.used_size / shm->config.frame_bytes;
 }
 
 /* Returns the total size of the shared memory region. */
-static inline unsigned cras_shm_total_size(const struct cras_audio_shm *shm)
+static inline uint32_t cras_shm_total_size(const struct cras_audio_shm *shm)
 {
 	return cras_shm_used_size(shm) * CRAS_NUM_SHM_BUFFERS +
 			sizeof(*shm->area);
@@ -425,7 +425,7 @@ static inline unsigned cras_shm_total_size(const struct cras_audio_shm *shm)
 
 /* Gets the counter of over-runs. */
 static inline
-unsigned cras_shm_num_overruns(const struct cras_audio_shm *shm)
+uint32_t cras_shm_num_overruns(const struct cras_audio_shm *shm)
 {
 	return shm->area->num_overruns;
 }
@@ -438,7 +438,7 @@ static inline void cras_shm_inc_cb_timeouts(struct cras_audio_shm *shm)
 
 /* Gets the counter of callback timeouts. */
 static inline
-unsigned cras_shm_num_cb_timeouts(const struct cras_audio_shm *shm)
+uint32_t cras_shm_num_cb_timeouts(const struct cras_audio_shm *shm)
 {
 	return shm->area->num_cb_timeouts;
 }

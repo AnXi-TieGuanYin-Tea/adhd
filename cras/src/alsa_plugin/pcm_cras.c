@@ -37,8 +37,8 @@ struct snd_pcm_cras {
 	struct cras_client *client;
 	int capture_sample_index;
 	int playback_sample_index;
-	struct timespec capture_sample_time;
-	struct timespec playback_sample_time;
+	struct cras_timespec capture_sample_time;
+	struct cras_timespec playback_sample_time;
 };
 
 /* Frees all resources allocated during use. */
@@ -120,8 +120,8 @@ static int pcm_cras_process_cb(struct cras_client *client,
 			       uint8_t *capture_samples,
 			       uint8_t *playback_samples,
 			       unsigned int nframes,
-			       const struct timespec *capture_ts,
-			       const struct timespec *playback_ts,
+			       const struct cras_timespec *capture_ts,
+			       const struct cras_timespec *playback_ts,
 			       void *arg)
 {
 	snd_pcm_ioplug_t *io;
@@ -132,7 +132,7 @@ static int pcm_cras_process_cb(struct cras_client *client,
 	size_t chan, frame_bytes, sample_bytes;
 	int rc;
 	uint8_t *samples;
-	const struct timespec *sample_time;
+	const struct cras_timespec *sample_time;
 
 	samples = capture_samples ? : playback_samples;
 	sample_time = capture_ts ? : playback_ts;
@@ -305,7 +305,7 @@ static int snd_pcm_cras_delay(snd_pcm_ioplug_t *io, snd_pcm_sframes_t *delayp)
 	snd_pcm_uframes_t limit;
 	int rc;
 	struct snd_pcm_cras *pcm_cras;
-	struct timespec latency;
+	struct cras_timespec latency;
 
 	pcm_cras = (struct snd_pcm_cras *)io->private_data;
 

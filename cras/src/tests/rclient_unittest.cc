@@ -22,21 +22,21 @@ static int cras_rstream_create_return;
 static struct cras_rstream *cras_rstream_create_stream_out;
 static int cras_rstream_destroy_called;
 static int cras_iodev_attach_stream_retval;
-static size_t cras_system_set_volume_value;
+static uint32_t cras_system_set_volume_value;
 static int cras_system_set_volume_called;
-static size_t cras_system_set_capture_gain_value;
+static int32_t cras_system_set_capture_gain_value;
 static int cras_system_set_capture_gain_called;
-static size_t cras_system_set_mute_value;
+static int32_t cras_system_set_mute_value;
 static int cras_system_set_mute_called;
-static size_t cras_system_set_user_mute_value;
+static int32_t cras_system_set_user_mute_value;
 static int cras_system_set_user_mute_called;
-static size_t cras_system_set_mute_locked_value;
+static int32_t cras_system_set_mute_locked_value;
 static int cras_system_set_mute_locked_called;
-static size_t cras_system_set_capture_mute_value;
+static int32_t cras_system_set_capture_mute_value;
 static int cras_system_set_capture_mute_called;
-static size_t cras_system_set_capture_mute_locked_value;
+static int32_t cras_system_set_capture_mute_locked_value;
 static int cras_system_set_capture_mute_locked_called;
-static size_t cras_make_fd_nonblocking_called;
+static int32_t cras_make_fd_nonblocking_called;
 static audio_thread* iodev_get_thread_return;
 static int audio_thread_add_stream_return;
 static unsigned int audio_thread_add_stream_called;
@@ -527,9 +527,9 @@ int cras_rstream_create(cras_stream_id_t stream_id,
 			enum CRAS_STREAM_TYPE stream_type,
 			enum CRAS_STREAM_DIRECTION direction,
 			const struct cras_audio_format *format,
-			size_t buffer_frames,
-			size_t cb_threshold,
-			size_t min_cb_level,
+			uint32_t buffer_frames,
+			uint32_t cb_threshold,
+			uint32_t min_cb_level,
 			uint32_t flags,
 			struct cras_rclient *client,
 			struct cras_rstream **stream_out)
@@ -568,13 +568,13 @@ int cras_make_fd_nonblocking(int fd)
   return 0;
 }
 
-void cras_system_set_volume(size_t volume)
+void cras_system_set_volume(uint32_t volume)
 {
   cras_system_set_volume_value = volume;
   cras_system_set_volume_called++;
 }
 
-void cras_system_set_capture_gain(long gain)
+void cras_system_set_capture_gain(int32_t gain)
 {
   cras_system_set_capture_gain_value = gain;
   cras_system_set_capture_gain_called++;
