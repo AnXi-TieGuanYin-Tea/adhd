@@ -34,8 +34,8 @@ struct cras_stream_params;
 typedef int (*cras_playback_cb_t)(struct cras_client *client,
 				  cras_stream_id_t stream_id,
 				  uint8_t *samples,
-				  size_t frames,
-				  const struct timespec *sample_time,
+				  unsigned frames,
+				  const struct cras_timespec *sample_time,
 				  void *user_arg);
 
 /* Callback for audio received and/or transmitted.
@@ -55,9 +55,9 @@ typedef int (*cras_unified_cb_t)(struct cras_client *client,
 				 cras_stream_id_t stream_id,
 				 uint8_t *captured_samples,
 				 uint8_t *playback_samples,
-				 unsigned int frames,
-				 const struct timespec *captured_time,
-				 const struct timespec *playback_time,
+				 unsigned frames,
+				 const struct cras_timespec *captured_time,
+				 const struct cras_timespec *playback_time,
 				 void *user_arg);
 
 /* Callback for handling errors. */
@@ -134,7 +134,7 @@ int cras_client_stop(struct cras_client *client);
 int cras_client_get_output_devices(const struct cras_client *client,
 				   struct cras_iodev_info *devs,
 				   struct cras_ionode_info *nodes,
-				   size_t *num_devs, size_t *num_nodes);
+				   unsigned *num_devs, unsigned *num_nodes);
 
 /* Returns the current list of input devices.
  * Args:
@@ -151,7 +151,7 @@ int cras_client_get_output_devices(const struct cras_client *client,
 int cras_client_get_input_devices(const struct cras_client *client,
 				  struct cras_iodev_info *devs,
 				  struct cras_ionode_info *nodes,
-				  size_t *num_devs, size_t *num_nodes);
+				  unsigned *num_devs, unsigned *num_nodes);
 
 /* Returns the current list of clients attached to the server.
  * Args:
@@ -165,7 +165,7 @@ int cras_client_get_input_devices(const struct cras_client *client,
  */
 int cras_client_get_attached_clients(const struct cras_client *client,
 				     struct cras_attached_client_info *clients,
-				     size_t max_clients);
+				     unsigned max_clients);
 
 /* Checks if the output device with the given name is currently plugged in.  For
  * internal devices this checks that jack state, for USB devices this will
@@ -256,9 +256,9 @@ int cras_client_update_audio_debug_info(
  */
 struct cras_stream_params *cras_client_stream_params_create(
 		enum CRAS_STREAM_DIRECTION direction,
-		size_t buffer_frames,
-		size_t cb_threshold,
-		size_t min_cb_level,
+		unsigned buffer_frames,
+		unsigned cb_threshold,
+		unsigned min_cb_level,
 		enum CRAS_STREAM_TYPE stream_type,
 		uint32_t flags,
 		void *user_data,
@@ -352,7 +352,7 @@ int cras_client_switch_iodev(struct cras_client *client,
  *    0 for success, -EPIPE if there is an I/O error talking to the server, or
  *    -EINVAL if 'client' is invalid.
  */
-int cras_client_set_system_volume(struct cras_client *client, size_t volume);
+int cras_client_set_system_volume(struct cras_client *client, unsigned volume);
 
 /* Sets the capture gain of the system. Gain is specified in dBFS * 100.  For
  * example 5dB of gain would be specified with an argument of 500, while -10
@@ -364,7 +364,7 @@ int cras_client_set_system_volume(struct cras_client *client, size_t volume);
  *    0 for success, -EPIPE if there is an I/O error talking to the server, or
  *    -EINVAL if 'client' is invalid.
  */
-int cras_client_set_system_capture_gain(struct cras_client *client, long gain);
+int cras_client_set_system_capture_gain(struct cras_client *client, int gain);
 
 /* Sets the mute state of the system.
  * Args:
@@ -427,7 +427,7 @@ int cras_client_set_system_capture_mute_locked(struct cras_client *client,
  * Returns:
  *    The current system volume between 0 and 100.
  */
-size_t cras_client_get_system_volume(struct cras_client *client);
+unsigned cras_client_get_system_volume(struct cras_client *client);
 
 /* Gets the current system capture gain.
  * Args:
@@ -435,7 +435,7 @@ size_t cras_client_get_system_volume(struct cras_client *client);
  * Returns:
  *    The current system capture volume in dB * 100.
  */
-long cras_client_get_system_capture_gain(struct cras_client *client);
+int cras_client_get_system_capture_gain(struct cras_client *client);
 
 /* Gets the current system mute state.
  * Args:
@@ -460,7 +460,7 @@ int cras_client_get_system_capture_muted(struct cras_client *client);
  *    The minimum value for the current output device in dBFS * 100.  This is
  *    the level of attenuation at volume == 1.
  */
-long cras_client_get_system_min_volume(struct cras_client *client);
+int cras_client_get_system_min_volume(struct cras_client *client);
 
 /* Gets the current maximum system volume.
  * Args:
@@ -469,7 +469,7 @@ long cras_client_get_system_min_volume(struct cras_client *client);
  *    The maximum value for the current output device in dBFS * 100.  This is
  *    the level of attenuation at volume == 100.
  */
-long cras_client_get_system_max_volume(struct cras_client *client);
+int cras_client_get_system_max_volume(struct cras_client *client);
 
 /* Gets the current minimum system capture gain.
  * Args:
@@ -477,7 +477,7 @@ long cras_client_get_system_max_volume(struct cras_client *client);
  * Returns:
  *    The minimum capture gain for the current input device in dBFS * 100.
  */
-long cras_client_get_system_min_capture_gain(struct cras_client *client);
+int cras_client_get_system_min_capture_gain(struct cras_client *client);
 
 /* Gets the current maximum system capture gain.
  * Args:
@@ -485,7 +485,7 @@ long cras_client_get_system_min_capture_gain(struct cras_client *client);
  * Returns:
  *    The maximum capture gain for the current input device in dBFS * 100.
  */
-long cras_client_get_system_max_capture_gain(struct cras_client *client);
+int cras_client_get_system_max_capture_gain(struct cras_client *client);
 
 /* Gets audio debug info.
  * Args:
@@ -508,7 +508,7 @@ const struct audio_debug_info *cras_client_get_audio_debug_info(
  *    The number of active streams.
  */
 unsigned cras_client_get_num_active_streams(struct cras_client *client,
-					    struct timespec *ts);
+					    struct cras_timespec *ts);
 
 /* Gets the id of the output node currently selected
  * Args:
@@ -554,8 +554,8 @@ int cras_client_format_bytes_per_frame(struct cras_audio_format *fmt);
  * Returns:
  *    0 on success, -EINVAL if delay is NULL.
  */
-int cras_client_calc_playback_latency(const struct timespec *sample_time,
-				      struct timespec *delay);
+int cras_client_calc_playback_latency(const struct cras_timespec *sample_time,
+				      struct cras_timespec *delay);
 
 /* For capture returns the latency of the next frame to be read from the buffer
  * (based on when it was captured).  Only valid when called from the audio
@@ -566,8 +566,8 @@ int cras_client_calc_playback_latency(const struct timespec *sample_time,
  * Returns:
  *    0 on success, -EINVAL if delay is NULL.
  */
-int cras_client_calc_capture_latency(const struct timespec *sample_time,
-				     struct timespec *delay);
+int cras_client_calc_capture_latency(const struct cras_timespec *sample_time,
+				     struct cras_timespec *delay);
 
 /* Set the volume of the given output node. Only for output nodes.
  * Args:
@@ -585,7 +585,7 @@ int cras_client_set_node_volume(struct cras_client *client,
  */
 int cras_client_set_node_capture_gain(struct cras_client *client,
 				      cras_node_id_t node_id,
-				      long gain);
+				      int gain);
 
 #ifdef __cplusplus
 }

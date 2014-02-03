@@ -59,10 +59,10 @@ size_t cras_mix_add_stream(struct cras_audio_shm *shm,
 {
 	int16_t *src;
 	int16_t *target = (int16_t *)dst;
-	size_t fr_written;
+	unsigned fr_written;
 	int fr_in_buf;
-	size_t num_samples;
-	size_t frames = 0;
+	unsigned num_samples;
+	unsigned frames = 0;
 	float mix_vol;
 
 	fr_in_buf = cras_shm_get_frames(shm);

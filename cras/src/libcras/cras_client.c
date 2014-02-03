@@ -43,10 +43,10 @@
 #include "cras_util.h"
 #include "utlist.h"
 
-static const size_t MAX_CMD_MSG_LEN = 256;
-static const size_t SERVER_CONNECT_TIMEOUT_US = 500000;
-static const size_t SERVER_SHUTDOWN_TIMEOUT_US = 500000;
-static const size_t SERVER_FIRST_MESSAGE_TIMEOUT_US = 500000;
+static const unsigned MAX_CMD_MSG_LEN = 256;
+static const unsigned SERVER_CONNECT_TIMEOUT_US = 500000;
+static const unsigned SERVER_SHUTDOWN_TIMEOUT_US = 500000;
+static const unsigned SERVER_FIRST_MESSAGE_TIMEOUT_US = 500000;
 
 /* Commands sent from the user to the running client. */
 enum {
@@ -98,9 +98,9 @@ struct thread_state {
  * above cras_client_create_stream_params in the header for descriptions. */
 struct cras_stream_params {
 	enum CRAS_STREAM_DIRECTION direction;
-	size_t buffer_frames;
-	size_t cb_threshold;
-	size_t min_cb_level;
+	unsigned buffer_frames;
+	unsigned cb_threshold;
+	unsigned min_cb_level;
 	enum CRAS_STREAM_TYPE stream_type;
 	uint32_t flags;
 	void *user_data;
@@ -618,8 +618,8 @@ static int handle_unified_request(struct client_stream *stream,
 	struct cras_stream_params *config;
 	uint8_t *captured_frames = NULL;
 	uint8_t *playback_frames = NULL;
-	struct timespec *capture_ts = NULL;
-	struct timespec *playback_ts = NULL;
+	struct cras_timespec *capture_ts = NULL;
+	struct cras_timespec *playback_ts = NULL;
 	int frames;
 	int rc = 0;
 	unsigned int server_frames = num_frames;
@@ -776,8 +776,8 @@ static int config_format_converter(struct cras_fmt_conv **conv,
 {
 	if (cras_fmt_conversion_needed(from, to)) {
 		syslog(LOG_DEBUG,
-		       "format convert: from:%d %zu %zu to: %d %zu %zu "
-		       "frames = %u",
+		       "format convert: from:%d %u %u to: %d %u %u "
+                       "frames = %u",
 		       from->format, from->frame_rate, from->num_channels,
 		       to->format, to->frame_rate, to->num_channels,
 		       frames);
@@ -1534,9 +1534,9 @@ int cras_client_connected_wait(struct cras_client *client)
 
 struct cras_stream_params *cras_client_stream_params_create(
 		enum CRAS_STREAM_DIRECTION direction,
-		size_t buffer_frames,
-		size_t cb_threshold,
-		size_t min_cb_level,
+		unsigned buffer_frames,
+		unsigned cb_threshold,
+		unsigned min_cb_level,
 		enum CRAS_STREAM_TYPE stream_type,
 		uint32_t flags,
 		void *user_data,
@@ -1697,7 +1697,7 @@ int cras_client_switch_iodev(struct cras_client *client,
 	return write_message_to_server(client, &serv_msg.header);
 }
 
-int cras_client_set_system_volume(struct cras_client *client, size_t volume)
+int cras_client_set_system_volume(struct cras_client *client, unsigned volume)
 {
 	struct cras_set_system_volume msg;
 
@@ -1708,7 +1708,7 @@ int cras_client_set_system_volume(struct cras_client *client, size_t volume)
 	return write_message_to_server(client, &msg.header);
 }
 
-int cras_client_set_system_capture_gain(struct cras_client *client, long gain)
+int cras_client_set_system_capture_gain(struct cras_client *client, int gain)
 {
 	struct cras_set_system_capture_gain msg;
 
@@ -1775,14 +1775,14 @@ int cras_client_set_system_capture_mute_locked(struct cras_client *client,
 	return write_message_to_server(client, &msg.header);
 }
 
-size_t cras_client_get_system_volume(struct cras_client *client)
+unsigned cras_client_get_system_volume(struct cras_client *client)
 {
 	if (!client || !client->server_state)
 		return 0;
 	return client->server_state->volume;
 }
 
-long cras_client_get_system_capture_gain(struct cras_client *client)
+int cras_client_get_system_capture_gain(struct cras_client *client)
 {
 	if (!client || !client->server_state)
 		return 0;
@@ -1803,28 +1803,28 @@ int cras_client_get_system_capture_muted(struct cras_client *client)
 	return client->server_state->capture_mute;
 }
 
-long cras_client_get_system_min_volume(struct cras_client *client)
+int cras_client_get_system_min_volume(struct cras_client *client)
 {
 	if (!client || !client->server_state)
 		return 0;
 	return client->server_state->min_volume_dBFS;
 }
 
-long cras_client_get_system_max_volume(struct cras_client *client)
+int cras_client_get_system_max_volume(struct cras_client *client)
 {
 	if (!client || !client->server_state)
 		return 0;
 	return client->server_state->max_volume_dBFS;
 }
 
-long cras_client_get_system_min_capture_gain(struct cras_client *client)
+int cras_client_get_system_min_capture_gain(struct cras_client *client)
 {
 	if (!client || !client->server_state)
 		return 0;
 	return client->server_state->min_capture_gain;
 }
 
-long cras_client_get_system_max_capture_gain(struct cras_client *client)
+int cras_client_get_system_max_capture_gain(struct cras_client *client)
 {
 	if (!client || !client->server_state)
 		return 0;
@@ -1841,7 +1841,7 @@ const struct audio_debug_info *cras_client_get_audio_debug_info(
 }
 
 unsigned cras_client_get_num_active_streams(struct cras_client *client,
-					    struct timespec *ts)
+					    struct cras_timespec *ts)
 {
 	unsigned num_streams, version;
 
@@ -1853,7 +1853,7 @@ read_active_streams_again:
 	num_streams = client->server_state->num_active_streams;
 	if (ts) {
 		if (num_streams)
-			clock_gettime(CLOCK_MONOTONIC, ts);
+			cras_clock_gettime(CLOCK_MONOTONIC, ts);
 		else
 			*ts = client->server_state->last_active_stream_time;
 	}
@@ -1927,7 +1927,7 @@ int cras_client_stop(struct cras_client *client)
 int cras_client_get_output_devices(const struct cras_client *client,
 				   struct cras_iodev_info *devs,
 				   struct cras_ionode_info *nodes,
-				   size_t *num_devs, size_t *num_nodes)
+				   unsigned *num_devs, unsigned *num_nodes)
 {
 	const struct cras_server_state *state;
 	unsigned avail_devs, avail_nodes, version;
@@ -1956,7 +1956,7 @@ read_outputs_again:
 int cras_client_get_input_devices(const struct cras_client *client,
 				  struct cras_iodev_info *devs,
 				  struct cras_ionode_info *nodes,
-				  size_t *num_devs, size_t *num_nodes)
+				  unsigned *num_devs, unsigned *num_nodes)
 {
 	const struct cras_server_state *state;
 	unsigned avail_devs, avail_nodes, version;
@@ -1984,7 +1984,7 @@ read_inputs_again:
 
 int cras_client_get_attached_clients(const struct cras_client *client,
 				     struct cras_attached_client_info *clients,
-				     size_t max_clients)
+				     unsigned max_clients)
 {
 	const struct cras_server_state *state;
 	unsigned num, version;
@@ -2021,7 +2021,7 @@ static int cras_client_find_output_node(const struct cras_client *client,
 					struct cras_iodev_info *dev_info,
 					struct cras_ionode_info *node_info)
 {
-	size_t ndevs, nnodes;
+	unsigned ndevs, nnodes;
 	struct cras_iodev_info *devs = NULL;
 	struct cras_ionode_info *nodes = NULL;
 	int rc = -1;
@@ -2119,33 +2119,33 @@ int cras_client_format_bytes_per_frame(struct cras_audio_format *fmt)
 	return cras_get_format_bytes(fmt);
 }
 
-int cras_client_calc_playback_latency(const struct timespec *sample_time,
-				      struct timespec *delay)
+int cras_client_calc_playback_latency(const struct cras_timespec *sample_time,
+				      struct cras_timespec *delay)
 {
-	struct timespec now;
+	struct cras_timespec now;
 
 	if (delay == NULL)
 		return -EINVAL;
 
-	clock_gettime(CLOCK_MONOTONIC, &now);
+	cras_clock_gettime(CLOCK_MONOTONIC, &now);
 
 	/* for output return time until sample is played (t - now) */
-	subtract_timespecs(sample_time, &now, delay);
+	subtract_cras_timespecs(sample_time, &now, delay);
 	return 0;
 }
 
-int cras_client_calc_capture_latency(const struct timespec *sample_time,
-				     struct timespec *delay)
+int cras_client_calc_capture_latency(const struct cras_timespec *sample_time,
+				     struct cras_timespec *delay)
 {
-	struct timespec now;
+	struct cras_timespec now;
 
 	if (delay == NULL)
 		return -EINVAL;
 
-	clock_gettime(CLOCK_MONOTONIC, &now);
+	cras_clock_gettime(CLOCK_MONOTONIC, &now);
 
 	/* For input want time since sample read (now - t) */
-	subtract_timespecs(&now, sample_time, delay);
+	subtract_cras_timespecs(&now, sample_time, delay);
 	return 0;
 }
 
@@ -2201,13 +2201,11 @@ int cras_client_set_node_volume(struct cras_client *client,
 
 int cras_client_set_node_capture_gain(struct cras_client *client,
 				      cras_node_id_t node_id,
-				      long gain)
+				      int gain)
 {
 	struct cras_set_node_attr msg;
 
 	if (client == NULL)
-		return -EINVAL;
-	if (gain > INT_MAX || gain < INT_MIN)
 		return -EINVAL;
 
 	cras_fill_set_node_attr(&msg, node_id, IONODE_ATTR_CAPTURE_GAIN, gain);

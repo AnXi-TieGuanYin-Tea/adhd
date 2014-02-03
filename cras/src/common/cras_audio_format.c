@@ -32,8 +32,8 @@ static const int channel_alt[CRAS_CH_MAX][CRAS_CH_MAX] =
 
 /* Create an audio format structure. */
 struct cras_audio_format *cras_audio_format_create(snd_pcm_format_t format,
-						   size_t frame_rate,
-						   size_t num_channels)
+						   unsigned frame_rate,
+						   unsigned num_channels)
 {
 	struct cras_audio_format *fmt;
 	unsigned i;
@@ -79,7 +79,7 @@ void cras_audio_format_destroy(struct cras_audio_format *fmt)
 	free(fmt);
 }
 
-float** cras_channel_conv_matrix_alloc(size_t in_ch, size_t out_ch)
+float** cras_channel_conv_matrix_alloc(unsigned in_ch, unsigned out_ch)
 {
 	size_t i;
 	float **p;
@@ -99,7 +99,7 @@ alloc_err:
 	return NULL;
 }
 
-void cras_channel_conv_matrix_destroy(float **p, size_t out_ch)
+void cras_channel_conv_matrix_destroy(float **p, unsigned out_ch)
 {
 	size_t i;
 	for (i = 0; i < out_ch; i ++)

@@ -166,7 +166,7 @@ static int open_dev(struct cras_iodev *iodev)
 	iodev->format->format = SND_PCM_FORMAT_S16_LE;
 	aio->num_underruns = 0;
 
-	syslog(LOG_DEBUG, "Configure alsa device %s rate %zuHz, %zu channels",
+	syslog(LOG_DEBUG, "Configure alsa device %s rate %uHz, %u channels",
 	       aio->dev, iodev->format->frame_rate,
 	       iodev->format->num_channels);
 	handle = 0; /* Avoid unused warning. */

@@ -85,14 +85,14 @@ static inline int buffer_meets_size_limit(size_t buffer_size, size_t rate)
 /* Verifies that the given stream parameters are valid. */
 static int verify_rstream_parameters(enum CRAS_STREAM_DIRECTION direction,
 				     const struct cras_audio_format *format,
-				     size_t buffer_frames,
-				     size_t cb_threshold,
-				     size_t min_cb_level,
+				     unsigned buffer_frames,
+				     unsigned cb_threshold,
+				     unsigned min_cb_level,
 				     struct cras_rclient *client,
 				     struct cras_rstream **stream_out)
 {
 	if (!buffer_meets_size_limit(buffer_frames, format->frame_rate)) {
-		syslog(LOG_ERR, "rstream: invalid buffer_frames %zu\n",
+		syslog(LOG_ERR, "rstream: invalid buffer_frames %u\n",
 		       buffer_frames);
 		return -EINVAL;
 	}
@@ -136,9 +136,9 @@ int cras_rstream_create(cras_stream_id_t stream_id,
 			enum CRAS_STREAM_TYPE stream_type,
 			enum CRAS_STREAM_DIRECTION direction,
 			const struct cras_audio_format *format,
-			size_t buffer_frames,
-			size_t cb_threshold,
-			size_t min_cb_level,
+			unsigned buffer_frames,
+			unsigned cb_threshold,
+			unsigned min_cb_level,
 			uint32_t flags,
 			struct cras_rclient *client,
 			struct cras_rstream **stream_out)
@@ -175,7 +175,7 @@ int cras_rstream_create(cras_stream_id_t stream_id,
 		return rc;
 	}
 
-	syslog(LOG_DEBUG, "stream %x frames %zu, cb_thresh %zu",
+	syslog(LOG_DEBUG, "stream %x frames %u, cb_thresh %u",
 	       stream_id, buffer_frames, cb_threshold);
 	*stream_out = stream;
 	return 0;
@@ -212,7 +212,7 @@ int cras_rstream_request_audio(const struct cras_rstream *stream)
 	return rc;
 }
 
-int cras_rstream_audio_ready(const struct cras_rstream *stream, size_t count)
+int cras_rstream_audio_ready(const struct cras_rstream *stream, unsigned count)
 {
 	struct audio_message msg;
 	int rc;

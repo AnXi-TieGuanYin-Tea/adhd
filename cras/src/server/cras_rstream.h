@@ -32,9 +32,9 @@ struct cras_rstream {
 	enum CRAS_STREAM_TYPE stream_type;
 	enum CRAS_STREAM_DIRECTION direction;
 	int fd; /* Socket for requesting and sending audio buffer events. */
-	size_t buffer_frames; /* Buffer size in frames. */
-	size_t cb_threshold; /* Callback client when this much is left. */
-	size_t min_cb_level; /* Don't callback unless this much is avail. */
+	unsigned buffer_frames; /* Buffer size in frames. */
+	unsigned cb_threshold; /* Callback client when this much is left. */
+	unsigned min_cb_level; /* Don't callback unless this much is avail. */
 	uint32_t flags;
 	struct cras_rclient *client;
 	struct rstream_shm_info input_shm_info;
@@ -64,9 +64,9 @@ int cras_rstream_create(cras_stream_id_t stream_id,
 			enum CRAS_STREAM_TYPE stream_type,
 			enum CRAS_STREAM_DIRECTION direction,
 			const struct cras_audio_format *format,
-			size_t buffer_frames,
-			size_t cb_threshold,
-			size_t min_cb_level,
+			unsigned buffer_frames,
+			unsigned cb_threshold,
+			unsigned min_cb_level,
 			uint32_t flags,
 			struct cras_rclient *client,
 			struct cras_rstream **stream_out);
@@ -195,7 +195,7 @@ static inline int stream_uses_loopback(const struct cras_rstream *s)
 int cras_rstream_request_audio(const struct cras_rstream *stream);
 
 /* Tells a capture client that count frames are ready. */
-int cras_rstream_audio_ready(const struct cras_rstream *stream, size_t count);
+int cras_rstream_audio_ready(const struct cras_rstream *stream, unsigned count);
 /* Waits for the response to a request for audio. */
 int cras_rstream_get_audio_request_reply(const struct cras_rstream *stream);
 /* Sends a message to the client telling him to re-attach the stream. Used when

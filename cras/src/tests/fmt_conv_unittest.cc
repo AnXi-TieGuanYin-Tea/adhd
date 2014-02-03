@@ -956,7 +956,7 @@ int main(int argc, char **argv) {
 }
 
 extern "C" {
-float** cras_channel_conv_matrix_alloc(size_t in_ch, size_t out_ch)
+float** cras_channel_conv_matrix_alloc(unsigned in_ch, unsigned out_ch)
 {
   int i;
   float** conv_mtx;
@@ -965,7 +965,7 @@ float** cras_channel_conv_matrix_alloc(size_t in_ch, size_t out_ch)
     conv_mtx[i] = (float *)calloc(CRAS_CH_MAX, sizeof(*conv_mtx[i]));
   return conv_mtx;
 }
-void cras_channel_conv_matrix_destroy(float **mtx, size_t out_ch)
+void cras_channel_conv_matrix_destroy(float **mtx, unsigned out_ch)
 {
   int i;
   for (i = 0; i < CRAS_CH_MAX; i++)

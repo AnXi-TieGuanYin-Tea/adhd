@@ -199,9 +199,9 @@ void cras_iodev_fill_time_from_frames(size_t frames,
 
 void cras_iodev_set_playback_timestamp(size_t frame_rate,
 				       size_t frames,
-				       struct timespec *ts)
+				       struct cras_timespec *ts)
 {
-	clock_gettime(CLOCK_MONOTONIC, ts);
+	cras_clock_gettime(CLOCK_MONOTONIC, ts);
 
 	/* For playback, want now + samples left to be played.
 	 * ts = time next written sample will be played to DAC,
@@ -215,11 +215,11 @@ void cras_iodev_set_playback_timestamp(size_t frame_rate,
 
 void cras_iodev_set_capture_timestamp(size_t frame_rate,
 				      size_t frames,
-				      struct timespec *ts)
+				      struct cras_timespec *ts)
 {
 	long tmp;
 
-	clock_gettime(CLOCK_MONOTONIC, ts);
+	cras_clock_gettime(CLOCK_MONOTONIC, ts);
 
 	/* For capture, now - samples left to be read.
 	 * ts = time next sample to be read was captured at ADC.
@@ -313,7 +313,7 @@ static void plug_node(struct cras_ionode *node, int plugged)
 	cras_iodev_list_notify_nodes_changed();
 }
 
-static void set_node_volume(struct cras_ionode *node, int value)
+static void set_node_volume(struct cras_ionode *node, unsigned value)
 {
 	struct cras_iodev *dev = node->dev;
 	unsigned int volume;
@@ -336,7 +336,7 @@ static void set_node_capture_gain(struct cras_ionode *node, int value)
 	if (dev->direction != CRAS_STREAM_INPUT)
 		return;
 
-	node->capture_gain = (long)value;
+	node->capture_gain = value;
 	if (dev->set_capture_gain)
 		dev->set_capture_gain(dev);
 

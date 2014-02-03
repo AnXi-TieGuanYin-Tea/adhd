@@ -17,7 +17,7 @@
  *    idx - iodev index.
  *    name - Name displayed to the user.
  */
-struct cras_iodev_info {
+struct __attribute__ ((__packed__)) cras_iodev_info {
 	uint32_t idx;
 	char name[CRAS_IODEV_NAME_BUFFER_SIZE];
 };
@@ -34,15 +34,15 @@ struct cras_iodev_info {
  *    type - Type displayed to the user.
  *    name - Name displayed to the user.
  */
-struct cras_ionode_info {
+struct __attribute__ ((__packed__)) cras_ionode_info {
 	uint32_t iodev_idx;
 	uint32_t ionode_idx;
-	size_t priority;
+	unsigned priority;
 	int plugged;
 	int active;
-	struct timeval plugged_time;
+	struct { int64_t tv_sec; int64_t tv_usec; } plugged_time;
 	unsigned int volume;
-	long capture_gain;
+	int capture_gain;
 	char type[CRAS_NODE_TYPE_BUFFER_SIZE];
 	char name[CRAS_NODE_NAME_BUFFER_SIZE];
 };

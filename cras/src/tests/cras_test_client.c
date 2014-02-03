@@ -31,7 +31,7 @@ static uint8_t *file_buf;
 static size_t file_buf_size;
 static size_t file_buf_read_offset;
 static int pipefd[2];
-static struct timespec last_latency;
+static struct cras_timespec last_latency;
 static int show_latency;
 static float last_rms_sqr_sum;
 static int last_rms_size;
@@ -41,7 +41,7 @@ static int show_rms;
 static int show_total_rms;
 static int keep_looping = 1;
 static int exit_after_done_playing = 1;
-static size_t duration_frames;
+static unsigned duration_frames;
 
 static struct cras_audio_codec *capture_codec;
 static struct cras_audio_codec *playback_codec;
@@ -112,8 +112,8 @@ static int got_samples(struct cras_client *client,
 		       uint8_t *captured_samples,
 		       uint8_t *playback_samples,
 		       unsigned int frames,
-		       const struct timespec *captured_time,
-		       const struct timespec *playback_time,
+		       const struct cras_timespec *captured_time,
+		       const struct cras_timespec *playback_time,
 		       void *user_arg)
 {
 	int *fd = (int *)user_arg;
@@ -167,8 +167,8 @@ static int put_samples(struct cras_client *client,
 		       uint8_t *captured_samples,
 		       uint8_t *playback_samples,
 		       unsigned int frames,
-		       const struct timespec *captured_time,
-		       const struct timespec *playback_time,
+		       const struct cras_timespec *captured_time,
+		       const struct cras_timespec *playback_time,
 		       void *user_arg)
 {
 	size_t this_size, decoded;
@@ -219,8 +219,8 @@ static int unified_samples(struct cras_client *client,
 			   uint8_t *captured_samples,
 			   uint8_t *playback_samples,
 			   unsigned int frames,
-			   const struct timespec *captured_time,
-			   const struct timespec *playback_time,
+			   const struct cras_timespec *captured_time,
+			   const struct cras_timespec *playback_time,
 			   void *user_arg)
 {
 	unsigned int frame_bytes;
@@ -236,8 +236,8 @@ static int put_stdin_samples(struct cras_client *client,
 		       uint8_t *captured_samples,
 		       uint8_t *playback_samples,
 		       unsigned int frames,
-		       const struct timespec *captured_time,
-		       const struct timespec *playback_time,
+		       const struct cras_timespec *captured_time,
+		       const struct cras_timespec *playback_time,
 		       void *user_arg)
 {
 	int rc = 0;
@@ -302,7 +302,7 @@ static void print_node_info(const struct cras_ionode_info *nodes, int num_nodes,
 	printf("\t ID\tPrio  %4s  Plugged\t Time\tType\t\t Name\n",
 	       is_input ? "Gain" : " Vol");
 	for (i = 0; i < num_nodes; i++)
-		printf("\t%u:%u\t%4zu %5g  %7s %10ld\t%-16s%c%s\n",
+		printf("\t%u:%u\t%4d %5g  %7s %10ld\t%-16s%c%s\n",
 		       nodes[i].iodev_idx,
 		       nodes[i].ionode_idx,
 		       nodes[i].priority,
@@ -319,7 +319,7 @@ static void print_device_lists(struct cras_client *client)
 {
 	struct cras_iodev_info devs[MAX_IODEVS];
 	struct cras_ionode_info nodes[MAX_IONODES];
-	size_t num_devs, num_nodes;
+	unsigned num_devs, num_nodes;
 	int rc;
 
 	num_devs = MAX_IODEVS;
@@ -371,7 +371,7 @@ static void print_attached_client_list(struct cras_client *client)
 	printf("Attached clients:\n");
 	printf("\tID\tpid\tuid\n");
 	for (i = 0; i < num_clients; i++)
-		printf("\t%zu\t%d\t%d\n",
+		printf("\t%u\t%d\t%d\n",
 		       clients[i].id,
 		       clients[i].pid,
 		       clients[i].gid);
@@ -379,7 +379,7 @@ static void print_attached_client_list(struct cras_client *client)
 
 static void print_active_stream_info(struct cras_client *client)
 {
-	struct timespec ts;
+	struct cras_timespec ts;
 	unsigned num_streams;
 
 	num_streams = cras_client_get_num_active_streams(client, &ts);
@@ -390,7 +390,7 @@ static void print_active_stream_info(struct cras_client *client)
 
 static void print_system_volumes(struct cras_client *client)
 {
-	printf("System Volume (0-100): %zu %s\n"
+	printf("System Volume (0-100): %u %s\n"
 	       "Capture Gain (%.2f - %.2f): %.2fdB %s\n",
 	       cras_client_get_system_volume(client),
 	       cras_client_get_system_muted(client) ? "(Muted)" : "",
@@ -476,9 +476,9 @@ static int start_stream(struct cras_client *client,
 }
 
 static int run_unified_io_stream(struct cras_client *client,
-				 size_t block_size,
-				 size_t rate,
-				 size_t num_channels)
+				 unsigned block_size,
+				 unsigned rate,
+				 unsigned num_channels)
 {
 	struct cras_stream_params *params;
 	cras_stream_id_t stream_id = 0;
@@ -528,9 +528,9 @@ static int parse_channel_layout(char *channel_layout_str,
 static int run_file_io_stream(struct cras_client *client,
 			      int fd,
 			      enum CRAS_STREAM_DIRECTION direction,
-			      size_t block_size,
-			      size_t rate,
-			      size_t num_channels)
+			      unsigned block_size,
+			      unsigned rate,
+			      unsigned num_channels)
 {
 	int rc, tty;
 	struct cras_stream_params *params;
@@ -542,8 +542,8 @@ static int run_file_io_stream(struct cras_client *client,
 	fd_set poll_set;
 	struct timespec sleep_ts;
 	float volume_scaler = 1.0;
-	size_t sys_volume = 100;
-	long cap_gain = 0;
+	unsigned sys_volume = 100;
+	int cap_gain = 0;
 	int mute = 0;
 	int8_t layout[CRAS_CH_MAX];
 
@@ -697,8 +697,8 @@ static int run_file_io_stream(struct cras_client *client,
 			print_attached_client_list(client);
 			break;
 		case 'v':
-			printf("Volume: %zu%s Min dB: %ld Max dB: %ld\n"
-			       "Capture: %ld%s Min dB: %ld Max dB: %ld\n",
+			printf("Volume: %u%s Min dB: %d Max dB: %d\n"
+			       "Capture: %d%s Min dB: %d Max dB: %d\n",
 			       cras_client_get_system_volume(client),
 			       cras_client_get_system_muted(client) ? "(Muted)"
 								    : "",
@@ -735,9 +735,9 @@ static int run_file_io_stream(struct cras_client *client,
 
 static int run_capture(struct cras_client *client,
 		       const char *file,
-		       size_t block_size,
-		       size_t rate,
-		       size_t num_channels,
+		       unsigned block_size,
+		       unsigned rate,
+		       unsigned num_channels,
 		       int loopback)
 {
 	int fd = open(file, O_CREAT | O_RDWR | O_TRUNC, 0666);
@@ -757,9 +757,9 @@ static int run_capture(struct cras_client *client,
 
 static int run_playback(struct cras_client *client,
 			const char *file,
-			size_t block_size,
-			size_t rate,
-			size_t num_channels)
+			unsigned block_size,
+			unsigned rate,
+			unsigned num_channels)
 {
 	int fd;
 
@@ -906,11 +906,11 @@ int main(int argc, char **argv)
 {
 	struct cras_client *client;
 	int c, option_index;
-	size_t block_size = NOT_ASSIGNED;
-	size_t rate = 48000;
+	unsigned block_size = NOT_ASSIGNED;
+	unsigned rate = 48000;
 	uint32_t iodev_index = 0;
 	int set_iodev = 0;
-	size_t num_channels = 2;
+	unsigned num_channels = 2;
 	float duration_seconds = 0;
 	const char *capture_file = NULL;
 	const char *playback_file = NULL;
@@ -995,7 +995,7 @@ int main(int argc, char **argv)
 			break;
 		}
 		case 'g': {
-			long gain = atol(optarg);
+			int gain = atoi(optarg);
 			rc = cras_client_set_system_capture_gain(client, gain);
 			if (rc < 0) {
 				fprintf(stderr, "problem setting capture\n");

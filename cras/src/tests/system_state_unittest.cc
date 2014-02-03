@@ -119,8 +119,8 @@ TEST(SystemStateSuite, SetCaptureVolume) {
 
 TEST(SystemStateSuite, VolumeChangedCallback) {
   void * const fake_user_arg = (void *)1;
-  const size_t fake_volume = 55;
-  const size_t fake_volume_2 = 44;
+  const unsigned fake_volume = 55;
+  const unsigned fake_volume_2 = 44;
   int rc;
 
   cras_system_state_init();
@@ -149,10 +149,10 @@ TEST(SystemStateSuite, VolumeChangedCallback) {
 TEST(SystemStateSuite, VolumeLimitChangedCallbackMultiple) {
   void * const fake_user_arg = (void *)1;
   void * const fake_user_arg_2 = (void *)2;
-  const size_t fake_min = -10000;
-  const size_t fake_max = 800;
-  const size_t fake_min_2 = -4500;
-  const size_t fake_max_2 = -600;
+  const int fake_min = -10000;
+  const int fake_max = 800;
+  const int fake_min_2 = -4500;
+  const int fake_max_2 = -600;
   int rc;
 
   cras_system_state_init();
@@ -199,8 +199,8 @@ TEST(SystemStateSuite, VolumeLimitChangedCallbackMultiple) {
 
 TEST(SystemStateSuite, CaptureVolumeChangedCallback) {
   void * const fake_user_arg = (void *)1;
-  const long fake_capture_gain = 2200;
-  const long fake_capture_gain_2 = -1600;
+  const int fake_capture_gain = 2200;
+  const int fake_capture_gain_2 = -1600;
   int rc;
 
   cras_system_state_init();
@@ -418,11 +418,11 @@ TEST(SystemSettingsStreamCount, StreamCount) {
   EXPECT_EQ(0, cras_system_state_get_active_streams());
   cras_system_state_stream_added();
   EXPECT_EQ(1, cras_system_state_get_active_streams());
-  struct timespec ts1;
+  struct cras_timespec ts1;
   cras_system_state_get_last_stream_active_time(&ts1);
   cras_system_state_stream_removed();
   EXPECT_EQ(0, cras_system_state_get_active_streams());
-  struct timespec ts2;
+  struct cras_timespec ts2;
   cras_system_state_get_last_stream_active_time(&ts2);
   EXPECT_NE(0, memcmp(&ts1, &ts2, sizeof(ts1)));
   cras_system_state_deinit();

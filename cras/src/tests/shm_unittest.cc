@@ -31,7 +31,7 @@ class ShmTestSuite : public testing::Test{
 
     struct cras_audio_shm shm_;
     int16_t *buf_;
-    size_t frames_;
+    unsigned frames_;
 };
 
 // Test that and empty buffer returns 0 readable bytes.
@@ -139,7 +139,7 @@ TEST_F(ShmTestSuite, WrapFromFinalBuffer) {
 
 // Test Check available to write returns 0 if not free buffer.
 TEST_F(ShmTestSuite, WriteAvailNotFree) {
-  size_t ret;
+  unsigned ret;
   shm_.area->write_buf_idx = 0;
   shm_.area->write_offset[0] = 100 * shm_.config.frame_bytes;
   shm_.area->read_offset[0] = 50 * shm_.config.frame_bytes;
@@ -149,7 +149,7 @@ TEST_F(ShmTestSuite, WriteAvailNotFree) {
 
 // Test Check available to write returns num_frames if free buffer.
 TEST_F(ShmTestSuite, WriteAvailValid) {
-  size_t ret;
+  unsigned ret;
   shm_.area->write_buf_idx = 0;
   shm_.config.used_size = 480 * shm_.config.frame_bytes;
   shm_.area->write_offset[0] = 0;
@@ -160,7 +160,7 @@ TEST_F(ShmTestSuite, WriteAvailValid) {
 
 // Test get frames_written returns the number of frames written.
 TEST_F(ShmTestSuite, GetNumWritten) {
-  size_t ret;
+  unsigned ret;
   shm_.area->write_buf_idx = 0;
   shm_.config.used_size = 480 * shm_.config.frame_bytes;
   shm_.area->write_offset[0] = 200 * shm_.config.frame_bytes;
