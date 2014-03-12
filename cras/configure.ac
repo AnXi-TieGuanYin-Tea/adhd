@@ -15,6 +15,8 @@ AM_PROG_CC_C_O
 PKG_PROG_PKG_CONFIG
 #AC_CONFIG_FILES([Makefile src/Makefile libcras.pc])
 
+AM_CONDITIONAL([HOST_CPU_X86_64], [ test "$host_cpu" = "x86_64" ])
+
 PKG_CHECK_MODULES([LIBSPEEX], [ speexdsp >= 1.2 ])
 PKG_CHECK_MODULES([ASOUNDLIB], [ alsa >= 1.0.23 ])
 PKG_CHECK_MODULES([DBUS], [ dbus-1 >= 1.4.12 ])

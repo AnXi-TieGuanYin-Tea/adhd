@@ -176,11 +176,16 @@ TESTS = \
 	mix_unittest \
 	rclient_unittest \
 	rstream_unittest \
-	shared_struct_size_unittest \
 	shm_unittest \
 	system_state_unittest \
 	util_unittest \
 	volume_curve_unittest
+
+# On x86_64, test structure sizes on 32 and 64 bits are the same
+if HOST_CPU_X86_64
+TESTS += \
+	shared_struct_size_unittest
+endif
 
 check_PROGRAMS = $(TESTS)
 
@@ -230,6 +235,7 @@ cmpraw_CPPFLAGS = $(COMMON_CPPFLAGS) -I$(top_srcdir)/src/dsp
 
 # Shared structure compatibility between 32 and 64 bit:
 # run from shared_struct_size_unittest
+if HOST_CPU_X86_64
 check_PROGRAMS += \
 	shared_struct_size_dump_32 \
 	shared_struct_size_dump_64
@@ -243,6 +249,7 @@ shared_struct_size_dump_64_SOURCES = tests/shared_struct_size_dump.c
 shared_struct_size_dump_64_LDADD = -lm
 shared_struct_size_dump_64_CFLAGS = $(COMMON_CFLAGS) \
 	-I$(top_srcdir)/src/common
+endif
 
 # unit tests
 alert_unittest_SOURCES = tests/alert_unittest.cc \
